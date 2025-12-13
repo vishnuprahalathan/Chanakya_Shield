@@ -1,0 +1,71 @@
+.packets-container {
+  padding: 2rem;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f4f7fc;
+  min-height: 100vh;
+}
+
+.packets-container h2 {
+  margin-bottom: 1rem;
+  color: #0074d9;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgb(0, 0, 0);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: center;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+th {
+  background-color: #0074d9;
+  color: white;
+}
+
+tr:hover {
+  background-color: #5e5d5d;
+}
+
+.anomaly {
+  background-color: rgba(255, 99, 71, 0.2);
+  color: #b30000;
+  font-weight: 600;
+}
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.stop-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.stop-btn:hover {
+  background-color: #b02a37;
+}
+
+.stop-btn:disabled {
+  background-color: gray;
+  cursor: not-allowed;
+}
+.stop-btn.stopped {
+  background-color: #4caf50;
+  cursor: not-allowed;
+}

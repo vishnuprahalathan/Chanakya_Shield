@@ -1,0 +1,112 @@
+.simulate-container {
+  text-align: center;
+  padding: 3rem;
+  background: linear-gradient(180deg, #0b0c10, #1f2833);
+  color: white;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.simulate-container h2 {
+  font-size: 2.4rem;
+  color: #66fcf1;
+  margin-bottom: 1rem;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px #45a29e;
+}
+
+.simulate-container p {
+  font-size: 1.1rem;
+  color: #c5c6c7;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+/* --- Button Section --- */
+.simulate-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.simulate-btn {
+  border: none;
+  padding: 0.9rem 2rem;
+  border-radius: 50px;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 0 10px rgba(102, 252, 241, 0.2);
+}
+
+/* Start Button */
+.simulate-btn.start {
+  background: #45a29e;
+}
+.simulate-btn.start:hover:not(:disabled) {
+  background: #66fcf1;
+  color: #0b0c10;
+  transform: scale(1.08);
+  box-shadow: 0 0 20px #66fcf1;
+}
+
+/* Stop Button */
+.simulate-btn.stop {
+  background: #dc3545;
+}
+.simulate-btn.stop:hover:not(:disabled) {
+  background: #ff4d4d;
+  transform: scale(1.08);
+  box-shadow: 0 0 20px #ff4d4d;
+}
+
+/* Disabled State */
+.simulate-btn:disabled {
+  background-color: #555;
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* --- Status Section --- */
+.simulate-status {
+  margin-top: 2rem;
+  font-size: 1.1rem;
+  color: #c5c6c7;
+}
+
+.status-running {
+  color: #00ff99;
+  font-weight: bold;
+  text-shadow: 0 0 10px #00ff99;
+}
+
+.status-stopped {
+  color: #ff4d4d;
+  font-weight: bold;
+  text-shadow: 0 0 10px #ff4d4d;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .simulate-container {
+    padding: 2rem;
+  }
+
+  .simulate-btn {
+    width: 100%;
+  }
+
+  .simulate-buttons {
+    flex-direction: column;
+    gap: 15px;
+  }
+}

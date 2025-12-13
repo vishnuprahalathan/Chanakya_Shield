@@ -1,0 +1,50 @@
+.home-container {
+  text-align: center;
+  color: white;
+  background: linear-gradient(to bottom right, #020024, #090979, #00d4ff);
+  min-height: 100vh;
+  padding: 3rem;
+}
+
+.title {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #cce7ff;
+}
+
+.features {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.feature {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 500;
+  backdrop-filter: blur(6px);
+}
+
+.start-btn {
+  background-color: #00e1ff;
+  color: #000;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.start-btn:hover {
+  background-color: #007bff;
+  color: white;
+}

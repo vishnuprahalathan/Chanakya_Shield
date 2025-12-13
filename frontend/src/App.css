@@ -1,0 +1,32 @@
+.App {
+  background-color: #0e0e0e;
+  color: white;
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #111;
+  padding: 1rem 2rem;
+  border-bottom: 2px solid #00c9ff;
+}
+
+.app-header h1 {
+  color: #00c9ff;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.nav-link {
+  color: #ccc;
+  margin-left: 20px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.nav-link:hover {
+  color: #00c9ff;
+}
