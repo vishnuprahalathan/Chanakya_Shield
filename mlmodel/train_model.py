@@ -1,74 +1,89 @@
+import os
 import pandas as pd
-from sklearn.ensemble import IsolationForest
-from sklearn.preprocessing import StandardScaler
-import joblib
 import numpy as np
+from sklearn.ensemble import IsolationForest, RandomForestClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix
+import joblib
+from pipeline.quantum_pipeline import apply_quantum_feature_selection
 
-print("📥 Loading CICIDS2017 dataset...")
-df = pd.read_csv(r"datasets/CICIDS2017_full.csv")
-print(f"✅ Dataset loaded: {df.shape}")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_PATH = os.path.join(BASE_DIR, "..", "datasets", "CICIDS2017_full.csv")
 
+def train_and_save():
+    if not os.path.exists(DATA_PATH):
+        raise FileNotFoundError(f"Dataset not found at {DATA_PATH}")
 
-df.columns = df.columns.str.strip()
+    df = pd.read_csv(DATA_PATH)
+    df.columns = df.columns.str.strip()
 
+    required_features = [
+        'Destination Port', 'Flow Duration', 'Total Fwd Packets', 'Total Backward Packets',
+        'Total Length of Fwd Packets', 'Total Length of Bwd Packets', 'Fwd Packet Length Mean',
+        'Bwd Packet Length Mean', 'Flow Packets/s', 'FIN Flag Count', 'SYN Flag Count',
+        'RST Flag Count', 'PSH Flag Count', 'ACK Flag Count', 'URG Flag Count',
+        'CWE Flag Count', 'ECE Flag Count', 'Label'
+    ]
 
-selected_features = [
-    'Destination Port',
-    'Flow Duration',
-    'Total Fwd Packets',
-    'Total Backward Packets',
-    'Total Length of Fwd Packets',
-    'Total Length of Bwd Packets',
-    'Fwd Packet Length Mean',
-    'Bwd Packet Length Mean',
-    'Flow Packets/s',
-    'FIN Flag Count',
-    'SYN Flag Count',
-    'RST Flag Count',
-    'PSH Flag Count',
-    'ACK Flag Count',
-    'URG Flag Count',
-    'CWE Flag Count',
-    'ECE Flag Count',
-]
+    available_features = [c for c in required_features if c in df.columns]
+    df = df[available_features].copy()
 
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df.dropna(inplace=True)
 
-available = [col for col in selected_features if col in df.columns]
-missing = [col for col in selected_features if col not in df.columns]
+    X = df.drop(columns=['Label'], errors='ignore')
+    y = df['Label'] if 'Label' in df.columns else np.zeros(len(df))
 
-print(f"✅ Using {len(available)} available features.")
-if missing:
-    print(f"⚠️ Missing columns skipped: {missing}")
+    # Encoding labels (Benign vs Attack)
+    y_binary = np.where(y == "BENIGN", 1, -1) # 1 for normal, -1 for anomaly (IsolationForest convention)
+    
+    # Feature Selection using QUBO
+    rf_selector = RandomForestClassifier(n_estimators=50, random_state=42, n_jobs=-1)
+    rf_selector.fit(X, y)
+    feature_importance = rf_selector.feature_importances_
+    corr_matrix = np.corrcoef(X.values, rowvar=False)
 
-df = df[available].copy()
+    selected_indices = apply_quantum_feature_selection(X.values, feature_importance, corr_matrix, k=15)
+    
+    # Ensure indices are valid
+    if not selected_indices:
+        selected_indices = list(range(X.shape[1])) # Fallback
+    
+    print(f"DEBUG: Selected {len(selected_indices)} features.")
+    
+    X_selected = X.iloc[:, selected_indices]
+    
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X_selected)
+    print(f"DEBUG: Scaler expects {scaler.n_features_in_} features.")
 
-print("🧹 Cleaning data (handling inf / NaN / extreme values)...")
-df.replace([np.inf, -np.inf], np.nan, inplace=True)
-df.dropna(inplace=True)
-df.reset_index(drop=True, inplace=True)
+    # Hybrid Ensemble Training
+    
+    # 1. Unsupervised: Isolation Forest (Anomaly Detection)
+    iso_forest = IsolationForest(n_estimators=100, contamination=0.05, random_state=42, n_jobs=-1)
+    iso_forest.fit(X_scaled)
 
+    # 2. Supervised: Random Forest (Attack Classification)
+    # Filter only attacks for classifier training or train on all with class weights?
+    # We train on all to distinguish types. 
+    # If dataset has string labels, we need to encode them for RF
+    
+    attack_labels = y.unique()
+    label_map = {label: idx for idx, label in enumerate(attack_labels)}
+    y_encoded = y.map(label_map)
+    
+    rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+    rf_classifier.fit(X_scaled, y_encoded)
 
-print(f"✅ Cleaned dataset shape: {df.shape}")
-print(f"📊 Feature value ranges:\n{df.describe().T[['min', 'max']]}")
+    # Artifact Saving
+    joblib.dump(iso_forest, os.path.join(BASE_DIR, "anomaly_model.pkl"))
+    joblib.dump(rf_classifier, os.path.join(BASE_DIR, "attack_classifier.pkl"))
+    joblib.dump(scaler, os.path.join(BASE_DIR, "scaler.pkl"))
+    joblib.dump(selected_indices, os.path.join(BASE_DIR, "selected_features.pkl"))
+    joblib.dump(label_map, os.path.join(BASE_DIR, "attack_labels.pkl"))
+    
+    print("Training complete. Artifacts saved.")
 
-
-print("⚙️ Scaling feature values...")
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(df)
-
-print("🚀 Training Isolation Forest model (unsupervised anomaly detection)...")
-model = IsolationForest(
-    n_estimators=100,
-    contamination=0.1,
-    random_state=42
-)
-model.fit(X_scaled)
-print("✅ Model training complete.")
-print(f"🌲 Number of trees: {len(model.estimators_)}")
-
-
-joblib.dump(model, "anomaly_model.pkl")
-joblib.dump(scaler, "scaler.pkl")
-print("💾 Model and scaler saved successfully at:")
-print("   ➤ anomaly_model.pkl")
-print("   ➤ scaler.pkl")
+if __name__ == "__main__":
+    train_and_save()

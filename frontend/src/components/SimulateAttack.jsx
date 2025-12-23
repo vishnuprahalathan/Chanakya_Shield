@@ -8,16 +8,14 @@ const SimulateAttack = () => {
   const [isStopping, setIsStopping] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
 
-  
   useEffect(() => {
     const fetchStatus = async () => {
       try {
         const res = await fetch("http://localhost:8080/api/status");
         const data = await res.json();
-        
         setIsRunning(data.simulation && data.simulation.includes("Running"));
       } catch (err) {
-        console.error("⚠️ Error fetching simulation status:", err);
+        console.error("Error fetching simulation status:", err);
       }
     };
 
@@ -26,20 +24,16 @@ const SimulateAttack = () => {
     return () => clearInterval(interval);
   }, []);
 
-
   const startSimulation = async () => {
     setIsStarting(true);
     try {
       const res = await fetch("http://localhost:8080/api/simulate-attack");
       const text = await res.text();
-      alert(text);
-
-
+      // alert(text); // Basic alert removed for better UX
       setIsRunning(true);
-      navigate("/packets");
+      // navigate("/packets"); // Stay on page to see status
     } catch (err) {
-      console.error("⚠️ Failed to start simulation:", err);
-      alert("❌ Could not start simulation!");
+      console.error("Failed to start simulation:", err);
     } finally {
       setIsStarting(false);
     }
@@ -49,12 +43,9 @@ const SimulateAttack = () => {
     setIsStopping(true);
     try {
       const res = await fetch("http://localhost:8080/api/stop-simulation");
-      const text = await res.text();
-      alert(text);
       setIsRunning(false);
     } catch (err) {
-      console.error("⚠️ Failed to stop simulation:", err);
-      alert("❌ Could not stop simulation!");
+      console.error("Failed to stop simulation:", err);
     } finally {
       setIsStopping(false);
     }
@@ -62,34 +53,35 @@ const SimulateAttack = () => {
 
   return (
     <div className="simulate-container">
-      <h2>💣 Attack Simulation</h2>
+      <h2>THREAT SIMULATION</h2>
       <p>
-        Run CICIDS2017 replay script to simulate network attacks and observe real-time packet analysis.
+        Initiate controlled cyber attacks using the CICIDS2017 replay engine.
       </p>
 
-      <div className="simulate-buttons">
-        <button
-          className="simulate-btn start"
-          onClick={startSimulation}
-          disabled={isStarting || isRunning}
-        >
-          {isStarting ? "⏳ Starting..." : "▶️ Start Simulation"}
-        </button>
+      <div className="control-panel">
+        <div className="simulate-buttons">
+          <button
+            className="simulate-btn start"
+            onClick={startSimulation}
+            disabled={isStarting || isRunning}
+          >
+            {isStarting ? "INITIALIZING..." : "INITIATE ATTACK"}
+          </button>
 
-        <button
-          className="simulate-btn stop"
-          onClick={stopSimulation}
-          disabled={!isRunning || isStopping}
-        >
-          {isStopping ? "⏳ Stopping..." : "🛑 Stop Simulation"}
-        </button>
-      </div>
+          <button
+            className="simulate-btn stop"
+            onClick={stopSimulation}
+            disabled={!isRunning || isStopping}
+          >
+            {isStopping ? "TERMINATING..." : "ABORT"}
+          </button>
+        </div>
 
-      <div className="simulate-status">
-        Status:{" "}
-        <span className={isRunning ? "status-running" : "status-stopped"}>
-          {isRunning ? "🟢 Running" : "🔴 Stopped"}
-        </span>
+        <div className="terminal-status">
+          <span className="terminal-line typing-cursor">
+            STATUS: {isRunning ? "SIMULATION ACTIVE - GENERATING TRAFFIC..." : "SYSTEM STANDBY - READY"}
+          </span>
+        </div>
       </div>
     </div>
   );

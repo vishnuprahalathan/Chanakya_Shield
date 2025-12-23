@@ -1,41 +1,13 @@
 import React, { useState, useEffect } from "react";
 import {
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  BarChart,
-  Bar,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  CartesianGrid,
-  XAxis,
-  YAxis,
+  LineChart, Line, PieChart, Pie, BarChart, Bar, Cell, Tooltip, ResponsiveContainer, Legend, CartesianGrid, XAxis, YAxis,
 } from "recharts";
 import "./Dashboard.css";
 
-const COLORS = [
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#0088FE",
-  "#FF66CC",
-  "#33CCFF",
-  "#AA66FF",
-];
+const COLORS = ["#00C49F", "#FFBB28", "#FF8042", "#0088FE", "#FF66CC", "#33CCFF", "#AA66FF"];
 
-// ✅ Map protocol numbers to protocol names
 const PROTOCOL_MAP = {
-  1: "ICMP",
-  6: "TCP",
-  17: "UDP",
-  2: "IGMP",
-  47: "GRE",
-  50: "ESP",
-  51: "AH",
-  89: "OSPF",
+  1: "ICMP", 6: "TCP", 17: "UDP", 2: "IGMP", 47: "GRE", 50: "ESP", 51: "AH", 89: "OSPF",
 };
 
 const PacketEyePro_Dashboard = () => {
@@ -43,39 +15,36 @@ const PacketEyePro_Dashboard = () => {
   const [protocolData, setProtocolData] = useState([]);
   const [timelineData, setTimelineData] = useState([]);
   const [attackData, setAttackData] = useState([]);
+  const [quantumFeatures, setQuantumFeatures] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
   const [lastUpdated, setLastUpdated] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [summaryRes, protocolRes, timelineRes, attackRes] =
-          await Promise.all([
-            fetch("http://localhost:8080/api/packets/summary"),
-            fetch("http://localhost:8080/api/packets/protocol-summary"),
-            fetch("http://localhost:8080/api/packets/timeline"),
-            fetch("http://localhost:8080/api/packets/attack-summary"),
-          ]);
+        const [summaryRes, protocolRes, timelineRes, attackRes, featuresRes] = await Promise.all([
+          fetch("http://localhost:8080/api/packets/summary"),
+          fetch("http://localhost:8080/api/packets/protocol-summary"),
+          fetch("http://localhost:8080/api/packets/timeline"),
+          fetch("http://localhost:8080/api/packets/attack-summary"),
+          fetch("http://localhost:8080/api/packets/features"),
+        ]);
 
-        const summaryJson = await summaryRes.json();
+        setSummary(await summaryRes.json());
+
         const protocolJson = await protocolRes.json();
-        const timelineJson = await timelineRes.json();
-        const attackJson = await attackRes.json();
-
-        setSummary(summaryJson);
-
-        // ✅ Convert protocol numbers to names
-        const mappedProtocolData = protocolJson.map((p) => ({
+        setProtocolData(protocolJson.map((p) => ({
           ...p,
           protocol: PROTOCOL_MAP[p.protocol] || `Unknown (${p.protocol})`,
-        }));
+        })));
 
-        setProtocolData(mappedProtocolData);
-        setTimelineData(processTimeline(timelineJson));
-        setAttackData(attackJson);
+        setTimelineData(processTimeline(await timelineRes.json()));
+        setAttackData(await attackRes.json());
+        setQuantumFeatures(await featuresRes.json());
+
         setLastUpdated(new Date().toLocaleTimeString());
       } catch (err) {
-        console.error("❌ Error fetching dashboard data:", err);
+        console.error("Error fetching dashboard data:", err);
       }
     };
 
@@ -95,133 +64,95 @@ const PacketEyePro_Dashboard = () => {
     return Object.values(grouped).reverse();
   };
 
-  if (!summary)
-    return (
-      <div className="text-center mt-10 text-gray-500 text-lg">
-        Loading Dashboard...
-      </div>
-    );
+  if (!summary) return <div className="loading-text">Loading Analytics...</div>;
 
   return (
     <div className={`dashboard ${darkMode ? "dark" : "light"}`}>
-      {/* HEADER */}
       <div className="dashboard-header">
-        <h1>📊 CHANAKYA SHIELD — Live Network Dashboard</h1>
+        <h1>Chanakya Shield Analytics</h1>
         <div className="header-controls">
           <p className="last-updated">Last Updated: {lastUpdated}</p>
-          <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
-          </button>
         </div>
       </div>
 
-      {/* KPI CARDS */}
       <div className="kpi-container">
         <KpiCard label="Total Packets" value={summary.totalPackets} color="#007bff" />
-        <KpiCard label="Normal" value={summary.normalPackets} color="#28a745" />
+        <KpiCard label="Normal Traffic" value={summary.normalPackets} color="#28a745" />
         <KpiCard label="Anomalies" value={summary.anomalyPackets} color="#ffc107" />
-        <KpiCard label="Attacks" value={summary.totalAttacks} color="#dc3545" />
-        <KpiCard
-          label="Anomaly Rate (%)"
-          value={`${summary.anomalyRate}%`}
-          color="#6f42c1"
-        />
+        <KpiCard label="Attacks Detected" value={summary.totalAttacks} color="#dc3545" />
+        <KpiCard label="Anomaly Rate" value={`${summary.anomalyRate}%`} color="#6f42c1" />
       </div>
 
-      {/* LINE CHART */}
-      <div className="chart-container">
-        <h2>📈 Traffic & Anomaly Timeline</h2>
-        {timelineData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={timelineData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="t" tick={{ fontSize: 10 }} />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="count"
-                stroke="#007bff"
-                name="Packets"
-                dot={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="anomalies"
-                stroke="#dc3545"
-                name="Anomalies"
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        ) : (
-          <p className="no-data">No timeline data yet</p>
-        )}
-      </div>
-
-      {/* 🌐 PROTOCOL PIE CHART */}
-      <div className="chart-container">
-        <h2>🌐 Protocol Distribution</h2>
-        {protocolData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={protocolData}
-                dataKey="count"
-                nameKey="protocol"
-                cx="50%"
-                cy="50%"
-                outerRadius={120}
-                label={({ protocol, percent }) =>
-                  `${protocol} (${(percent * 100).toFixed(1)}%)`
-                } // ✅ Show protocol name + %
-              >
-                {protocolData.map((_, index) => (
-                  <Cell
-                    key={`cell-proto-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
+      <div className="dashboard-grid">
+        {/* QUANTUM FEATURES CARD */}
+        <div className="chart-container features-card">
+          <h2>Quantum Optimized Features</h2>
+          <div className="features-list">
+            {quantumFeatures.length > 0 ? (
+              <ul>
+                {quantumFeatures.map((f, i) => (
+                  <li key={i}>{f}</li>
                 ))}
-              </Pie>
-              <Tooltip
-                formatter={(value, name, entry) => [
-                  `${value}`,
-                  entry.payload.protocol,
-                ]}
-              />
-              <Legend formatter={(value) => `${value}`} />
-            </PieChart>
-          </ResponsiveContainer>
-        ) : (
-          <p className="no-data">No protocol data available</p>
-        )}
-      </div>
+              </ul>
+            ) : (
+              <p>No features loaded.</p>
+            )}
+          </div>
+          <div className="feature-status">
+            <span>Algorithm: QUBO (Simulated Annealing)</span>
+            <span>Selection: Optimized for Accuracy</span>
+          </div>
+        </div>
 
-      {/* 🧠 ATTACK TYPE DISTRIBUTION */}
-      <div className="chart-container">
-        <h2>💀 Attack Type Distribution</h2>
-        {attackData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={attackData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="attack" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="count" fill="#dc3545" name="Attack Count">
-                {attackData.map((_, index) => (
-                  <Cell
-                    key={`cell-attack-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          <p className="no-data">No attack data available</p>
-        )}
+        <div className="chart-container">
+          <h2>Traffic Timeline</h2>
+          {timelineData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={timelineData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="t" tick={{ fontSize: 10 }} />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="count" stroke="#007bff" name="Total Packets" dot={false} />
+                <Line type="monotone" dataKey="anomalies" stroke="#dc3545" name="Anomalies" dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : <p className="no-data">No data available</p>}
+        </div>
+
+        <div className="chart-container">
+          <h2>Protocol Distribution</h2>
+          {protocolData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie data={protocolData} dataKey="count" nameKey="protocol" cx="50%" cy="50%" outerRadius={80} label>
+                  {protocolData.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : <p className="no-data">No data available</p>}
+        </div>
+
+        <div className="chart-container">
+          <h2>Attack Classification</h2>
+          {attackData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={attackData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="attack" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="count" fill="#dc3545" name="Count">
+                  {attackData.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : <p className="no-data">No data available</p>}
+        </div>
       </div>
     </div>
   );

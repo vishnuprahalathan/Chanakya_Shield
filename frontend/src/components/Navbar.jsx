@@ -1,43 +1,34 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import "./Navbar.css";
 
 const Navbar = () => {
-  const [darkMode, setDarkMode] = useState(() => {
-   
-    return localStorage.getItem("theme") === "dark";
-  });
+  const location = useLocation();
 
-
-  useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add("dark-theme");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.body.classList.remove("dark-theme");
-      localStorage.setItem("theme", "light");
-    }
-  }, [darkMode]);
+  const isActive = (path) => location.pathname === path ? "nav-link active" : "nav-link";
 
   return (
-    <nav className={`navbar ${darkMode ? "dark" : "light"}`}>
-      <div className="logo">⚔️ Chanakya Shield</div>
+    <nav className="navbar-container">
+      <div className="navbar-glass">
+        <div className="logo-section">
+          <div className="logo-icon">🛡️</div>
+          <span className="logo-text">CHANAKYA <span className="highlight">SHIELD</span></span>
+        </div>
 
-      <ul>
-        <li><Link to="/">Home</Link></li>
-        <li><Link to="/packets">Packets Captured</Link></li>
-        <li><Link to="/dashboard">Dashboard</Link></li>
-        <li><Link to="/simulate">Simulate Attack</Link></li>
-        <li><Link to="/alerts">Telegram Alerts</Link></li>
-      </ul>
+        <ul className="nav-items">
+          <li><Link to="/" className={isActive("/")}>Home</Link></li>
+          <li><Link to="/dashboard" className={isActive("/dashboard")}>Dashboard</Link></li>
+          <li><Link to="/packets" className={isActive("/packets")}>Live Traffic</Link></li>
+          <li><Link to="/simulate" className={isActive("/simulate")}>Simulation</Link></li>
+          <li><Link to="/alerts" className={isActive("/alerts")}>Alerts</Link></li>
+        </ul>
 
-      {/* 🌗 Theme Toggle Button */}
-      <button
-        className="theme-toggle-btn"
-        onClick={() => setDarkMode(!darkMode)}
-      >
-        {darkMode ? "☀️ Light" : "🌙 Dark"}
-      </button>
+        {/* Status Indicator (Purely cosmetic for 'connected' feel) */}
+        <div className="system-status">
+          <span className="status-dot"></span>
+          <span className="status-text">SYSTEM ONLINE</span>
+        </div>
+      </div>
     </nav>
   );
 };

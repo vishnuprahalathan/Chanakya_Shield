@@ -45,7 +45,7 @@ public class PacketController {
                     System.out.println("[PYTHON] " + line);
                 }
             } catch (IOException e) {
-                System.err.println("⚠️ Error reading Python process output: " + e.getMessage());
+                System.err.println("Error reading Python process output: " + e.getMessage());
             }
         }).start();
 
@@ -57,7 +57,7 @@ public class PacketController {
     public String startCapture() {
         try {
             if (analysisProcess != null && analysisProcess.isAlive()) {
-                return "⚠️ analysis.py is already running.";
+                return " analysis.py is already running.";
             }
             String pythonExe = "C:\\Users\\Vishnu Prahalathan\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
             String workingDir = "F:\\packeteye-pro";
@@ -67,7 +67,7 @@ public class PacketController {
             return "✅ Real-time packet capture started successfully ";
         } catch (IOException e) {
             e.printStackTrace();
-            return "❌ Failed to start analysis.py: " + e.getMessage();
+            return " Failed to start analysis.py: " + e.getMessage();
         }
     }
 
@@ -76,7 +76,7 @@ public class PacketController {
     public String simulateAttack() {
         try {
             if (simulationProcess != null && simulationProcess.isAlive()) {
-                return "⚠️ Simulation is already running.";
+                return " Simulation is already running.";
             }
             String pythonExe = "C:\\Users\\Vishnu Prahalathan\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
             String workingDir = "F:\\packeteye-pro";
@@ -86,7 +86,7 @@ public class PacketController {
             return "🎯 Attack simulation started successfully (replay_from_csv.py)";
         } catch (IOException e) {
             e.printStackTrace();
-            return "❌ Failed to start simulation: " + e.getMessage();
+            return " Failed to start simulation: " + e.getMessage();
         }
     }
 
@@ -95,7 +95,7 @@ public class PacketController {
     public String startTelegramAlerts() {
         try {
             if (telegramProcess != null && telegramProcess.isAlive()) {
-                return "⚠️ Telegram service already running.";
+                return " Telegram service already running.";
             }
             String pythonExe = "C:\\Users\\Vishnu Prahalathan\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
             String workingDir = "F:\\packeteye-pro";
@@ -105,7 +105,7 @@ public class PacketController {
             return "📲 Telegram alert service started successfully!";
         } catch (IOException e) {
             e.printStackTrace();
-            return "❌ Failed to start Telegram alert service: " + e.getMessage();
+            return " Failed to start Telegram alert service: " + e.getMessage();
         }
     }
 
@@ -114,27 +114,27 @@ public class PacketController {
     public String stopCapture() {
         if (analysisProcess != null && analysisProcess.isAlive()) {
             analysisProcess.destroy();
-            return "🛑 Packet capture stopped successfully.";
+            return " Packet capture stopped successfully.";
         }
-        return "⚠️ No active capture process found.";
+        return " No active capture process found.";
     }
 
     @GetMapping("/stop-simulation")
     public String stopSimulation() {
         if (simulationProcess != null && simulationProcess.isAlive()) {
             simulationProcess.destroy();
-            return "🛑 Simulation stopped successfully.";
+            return " Simulation stopped successfully.";
         }
-        return "⚠️ No active simulation process found.";
+        return " No active simulation process found.";
     }
 
     @GetMapping("/stop-telegram")
     public String stopTelegram() {
         if (telegramProcess != null && telegramProcess.isAlive()) {
             telegramProcess.destroy();
-            return "🛑 Telegram alert service stopped successfully.";
+            return " Telegram alert service stopped successfully.";
         }
-        return "⚠️ No active telegram process found.";
+        return " No active telegram process found.";
     }
 
     @GetMapping("/status")
@@ -230,8 +230,22 @@ public class PacketController {
     }
 
    
+    @GetMapping("/packets/features")
+    public List<String> getSelectedFeatures() {
+        File file = new File("F:\\packeteye-pro\\selected_features.json");
+        if (!file.exists()) {
+            return List.of("No features selected yet.");
+        }
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            return mapper.readValue(file, List.class);
+        } catch (IOException e) {
+            return List.of("Error loading features: " + e.getMessage());
+        }
+    }
+
     @RequestMapping("/error")
     public String handleError() {
-        return "⚠️ Invalid request method or path.";
+        return "Invalid request method or path.";
     }
 }

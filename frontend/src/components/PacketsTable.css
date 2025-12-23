@@ -1,71 +1,87 @@
+/* PacketsTable.css */
 .packets-container {
-  padding: 2rem;
-  font-family: 'Poppins', sans-serif;
-  background-color: #f4f7fc;
-  min-height: 100vh;
+  padding: 8rem 2rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.packets-container h2 {
-  margin-bottom: 1rem;
-  color: #0074d9;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: rgb(0, 0, 0);
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-th, td {
-  padding: 12px 15px;
-  text-align: center;
-  border-bottom: 1px solid #e5e5e5;
-}
-
-th {
-  background-color: #0074d9;
-  color: white;
-}
-
-tr:hover {
-  background-color: #5e5d5d;
-}
-
-.anomaly {
-  background-color: rgba(255, 99, 71, 0.2);
-  color: #b30000;
-  font-weight: 600;
-}
 .header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 2rem;
+}
+
+.header-row h2 {
+  font-size: 2rem;
+  background: linear-gradient(to right, white, var(--text-muted));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .stop-btn {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 10px 18px;
+  background: rgba(255, 42, 109, 0.1);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  padding: 0.8rem 1.5rem;
   border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .stop-btn:hover {
-  background-color: #b02a37;
+  background: var(--danger);
+  color: white;
 }
 
-.stop-btn:disabled {
-  background-color: gray;
-  cursor: not-allowed;
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  /* Gap between rows */
 }
-.stop-btn.stopped {
-  background-color: #4caf50;
-  cursor: not-allowed;
+
+thead th {
+  text-align: left;
+  padding: 1rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+tbody tr {
+  background: rgba(255, 255, 255, 0.03);
+  transition: background 0.2s ease;
+}
+
+tbody tr:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+td {
+  padding: 1rem;
+  font-size: 0.95rem;
+}
+
+td:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+td:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* Anomaly Row Style */
+tr.anomaly {
+  background: rgba(255, 42, 109, 0.1);
+  border: 1px solid var(--danger);
+  box-shadow: inset 0 0 10px rgba(255, 42, 109, 0.1);
+}
+
+tr.anomaly td {
+  color: #ffadb3;
 }

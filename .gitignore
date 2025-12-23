@@ -1,16 +1,18 @@
-# ================= LARGE DATASETS =================
+# Dependencies
+node_modules/
+frontend/node_modules/
+target/
+venv/
+__pycache__/
+
+# Datasets (Too large for git usually, unless LFS)
 datasets/
 TestingDatasets/
-database/
 
-# ================= FRONTEND =================
-frontend/node_modules/
-frontend/node_modules/.cache/
-
-# ================= PYTHON =================
-__pycache__/
-*.pyc
-
-# ================= LOGS & TEMP =================
+# Artifacts
+*.pkl
+*.class
 *.log
-*.tmp
+
+# Large Database Files
+database/*.csv

@@ -26,11 +26,11 @@ AMPLIFY_ATTACKS = True
 AMPLIFY_LABEL = "DDoS"
 AMPLIFY_FACTOR = 5
 
-ISO_MODEL = "anomaly_model.pkl"
-ISO_SCALER = "scaler.pkl"
-CLF_MODEL = "attack_classifier.pkl"
-CLF_SCALER = "attack_scaler.pkl"
-ATTACK_LABELS = "attack_labels.pkl"
+ISO_MODEL = "mlmodel/anomaly_model.pkl"
+ISO_SCALER = "mlmodel/scaler.pkl"
+CLF_MODEL = "mlmodel/attack_classifier.pkl"
+CLF_SCALER = "mlmodel/scaler.pkl" # Shared scaler
+ATTACK_LABELS = "mlmodel/attack_labels.pkl"
 
 
 BOT_TOKEN = "8233619292:AAGDyAxVfDko_AEkNxMFaDWwhB4Wpx4sRIU"
@@ -71,7 +71,9 @@ iso_scaler = joblib.load(ISO_SCALER)
 try:
     clf_model = joblib.load(CLF_MODEL)
     clf_scaler = joblib.load(CLF_SCALER)
-    attack_labels = joblib.load(ATTACK_LABELS)
+    label_map = joblib.load(ATTACK_LABELS)
+    # Invert map to get Index -> Label
+    attack_labels = {v: k for k, v in label_map.items()}
     have_classifier = True
     print("✅ Attack classifier loaded.")
 except:
@@ -79,6 +81,7 @@ except:
     attack_labels = ["DDoS", "PortScan", "Botnet", "Infiltration", "WebAttack", "BruteForce"]
     print("⚠️ No classifier found — using random attack type simulation.")
 
+# Features must match train_model.py EXACTLY
 selected_features = [
     'Destination Port','Flow Duration','Total Fwd Packets','Total Backward Packets',
     'Total Length of Fwd Packets','Total Length of Bwd Packets',
@@ -86,6 +89,34 @@ selected_features = [
     'FIN Flag Count','SYN Flag Count','RST Flag Count','PSH Flag Count',
     'ACK Flag Count','URG Flag Count','CWE Flag Count','ECE Flag Count'
 ]
+
+# Load QUBO selected features if available to filter
+try:
+    selected_indices = joblib.load("mlmodel/selected_features.pkl")
+    # Mapping indices back to names based on train_model.py logic
+    # In train_model.py, df is filtered by available_features first.
+    # We will trust the scaler needs the SUBSET if selected_features.pkl implies it.
+    # However, train_model.py says: X_selected = X.iloc[:, selected_indices]
+    # So we need to select columns by index from the 'selected_features' list.
+    
+    # Actually, simpler: The scaler expects the REDUCED feature set.
+    # We must filter 'selected_features' using 'selected_indices'.
+    
+    # Re-create the list used in training to map indices
+    full_feature_list = [
+        'Destination Port', 'Flow Duration', 'Total Fwd Packets', 'Total Backward Packets',
+        'Total Length of Fwd Packets', 'Total Length of Bwd Packets', 'Fwd Packet Length Mean',
+        'Bwd Packet Length Mean', 'Flow Packets/s', 'FIN Flag Count', 'SYN Flag Count',
+        'RST Flag Count', 'PSH Flag Count', 'ACK Flag Count', 'URG Flag Count',
+        'CWE Flag Count', 'ECE Flag Count', 'Label' # Label is not in X
+    ][:17] # First 17 are features
+    
+    QUBO_FEATURES = [full_feature_list[i] for i in selected_indices if i < len(full_feature_list)]
+    print(f"✅ Using {len(QUBO_FEATURES)} QUBO-selected features.")
+    
+except Exception as e:
+    print(f"⚠️ Could not load selected_features.pkl. Using full set (may fail if model expects subset): {e}")
+    QUBO_FEATURES = selected_features
 
 
 def trigger_alert(src, dst, proto, length, reason, attack):
@@ -127,10 +158,12 @@ for chunk in pd.read_csv(CSV_PATH, chunksize=CHUNK_SIZE, low_memory=False):
     attacks = generate_fake_ips(attacks)
 
    
-    for col in selected_features:
+    for col in QUBO_FEATURES:
         if col not in attacks.columns:
             attacks[col] = 0
-    X = attacks[selected_features].fillna(0).replace([np.inf,-np.inf],0)
+    
+    # Select only the features expected by the model
+    X = attacks[QUBO_FEATURES].fillna(0).replace([np.inf,-np.inf],0)
     X_iso = iso_scaler.transform(X)
     preds = iso_model.predict(X_iso)
 
@@ -157,9 +190,10 @@ for chunk in pd.read_csv(CSV_PATH, chunksize=CHUNK_SIZE, low_memory=False):
         if have_classifier:
             X_clf = clf_scaler.transform(pd.DataFrame([X.iloc[i]]))
             pred = clf_model.predict(X_clf)[0]
-            attack_type = attack_labels[pred] if pred < len(attack_labels) else "Unknown"
+            # Use dictionary lookup with default 'Unknown'
+            attack_type = attack_labels.get(pred, "Unknown")
         else:
-            attack_type = random.choice(attack_labels)
+            attack_type = random.choice(list(attack_labels.values())) if isinstance(attack_labels, dict) else random.choice(attack_labels)
 
         if str(attack_type).upper() == "BENIGN":
             attack_type = random.choice(["DDoS", "PortScan", "Botnet", "Infiltration"])
