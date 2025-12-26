@@ -33,8 +33,14 @@ CLF_SCALER = "mlmodel/scaler.pkl" # Shared scaler
 ATTACK_LABELS = "mlmodel/attack_labels.pkl"
 
 
-BOT_TOKEN = "8233619292:AAGDyAxVfDko_AEkNxMFaDWwhB4Wpx4sRIU"
-CHAT_ID = "1115227029"
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from root
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 ALERT_ATTACKS = ["DDoS", "PortScan", "Botnet", "Infiltration"]
 
 def send_telegram_alert(src_ip, dest_ip, attack_type, reason):
@@ -59,7 +65,12 @@ def send_telegram_alert(src_ip, dest_ip, attack_type, reason):
         print("⚠️ Telegram alert error:", e)
 
 
-DB_CONFIG = dict(host="localhost", user="root", password="8883", database="packeteye")
+DB_CONFIG = dict(
+    host=os.getenv("DB_HOST", "localhost"),
+    user=os.getenv("DB_USER", "root"),
+    password=os.getenv("DB_PASSWORD", ""),
+    database=os.getenv("DB_NAME", "packeteye")
+)
 conn = mysql.connector.connect(**DB_CONFIG)
 cursor = conn.cursor()
 

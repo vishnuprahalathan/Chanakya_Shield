@@ -8,14 +8,20 @@ import requests
 import warnings
 import os
 
+import os
+from dotenv import load_dotenv
+
 warnings.filterwarnings("ignore")
 
-# Configuration
-BOT_TOKEN = "8233619292:AAGDyAxVfDko_AEkNxMFaDWwhB4Wpx4sRIU"
-CHAT_ID = "1115227029"
-ALERT_ATTACKS = ["DoS Hulk", "PortScan", "DDoS", "Infiltration", "Bot", "Web Attack"] # Customize as needed
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Load environment variables
+load_dotenv(os.path.join(os.path.dirname(BASE_DIR), ".env"))
+
+# Configuration
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
+ALERT_ATTACKS = ["DoS Hulk", "PortScan", "DDoS", "Infiltration", "Bot", "Web Attack"] 
 
 def load_models():
     try:
@@ -52,10 +58,10 @@ def send_telegram_alert(src_ip, dest_ip, attack_type, reason):
 
 def get_db_connection():
     return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="8883",
-        database="packeteye"
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "root"),
+        password=os.getenv("DB_PASSWORD", ""),
+        database=os.getenv("DB_NAME", "packeteye")
     )
 
 def init_db():
@@ -88,25 +94,43 @@ ALL_FEATURE_COLUMNS = [
     'ACK Flag Count','URG Flag Count','CWE Flag Count','ECE Flag Count'
 ]
 
+# Track flows for real feature extraction
+flow_stats = {}
+
 def extract_features(packet):
     if not packet.haslayer(IP):
         return None
 
     length = len(packet)
     flags = int(packet[TCP].flags) if packet.haslayer(TCP) else 0
+    src_ip = packet[IP].src
+    dest_ip = packet[IP].dst
+    flow_key = tuple(sorted([src_ip, dest_ip]))
 
-    # Note: Real-time flow feature extraction approx. 
-    # For production, flow aggregation is needed.
+    now = datetime.datetime.now().timestamp()
+    if flow_key not in flow_stats:
+        flow_stats[flow_key] = {'start': now, 'fwd': 0, 'bwd': 0, 'len_fwd': 0, 'len_bwd': 0}
+    
+    stats = flow_stats[flow_key]
+    duration = max(1, int((now - stats['start']) * 1000000)) # in microseconds
+    
+    if src_ip == flow_key[0]:
+        stats['fwd'] += 1
+        stats['len_fwd'] += length
+    else:
+        stats['bwd'] += 1
+        stats['len_bwd'] += length
+
     return {
         'Destination Port': packet[TCP].dport if packet.haslayer(TCP) else 0,
-        'Flow Duration': np.random.randint(1000, 500000), 
-        'Total Fwd Packets': np.random.randint(1, 50),
-        'Total Backward Packets': np.random.randint(1, 50),
-        'Total Length of Fwd Packets': length,
-        'Total Length of Bwd Packets': length // 2,
-        'Fwd Packet Length Mean': length,
-        'Bwd Packet Length Mean': length / 2,
-        'Flow Packets/s': np.random.uniform(0.1, 1000),
+        'Flow Duration': duration, 
+        'Total Fwd Packets': stats['fwd'],
+        'Total Backward Packets': stats['bwd'],
+        'Total Length of Fwd Packets': stats['len_fwd'],
+        'Total Length of Bwd Packets': stats['len_bwd'],
+        'Fwd Packet Length Mean': stats['len_fwd'] / max(1, stats['fwd']),
+        'Bwd Packet Length Mean': stats['len_bwd'] / max(1, stats['bwd']),
+        'Flow Packets/s': (stats['fwd'] + stats['bwd']) / max(0.001, (now - stats['start'])),
         'FIN Flag Count': flags & 0x01,
         'SYN Flag Count': (flags & 0x02) >> 1,
         'RST Flag Count': (flags & 0x04) >> 2,
@@ -151,22 +175,24 @@ def process_packet(packet):
         attack_type = "BENIGN"
 
         if anomaly_score == -1:
-            status = "Anomaly"
-            
             # 2. Random Forest (Classification)
             pred_idx = rf_model.predict(X_scaled)[0]
             attack_type = inv_label_map.get(pred_idx, "Unknown")
             
             if attack_type == "BENIGN": 
-                # Conflict: IF says Anomaly, RF says Benign. 
-                # Trust IF for zero-day potential or flag as Suspect.
-                reason = "Statistical Anomaly (Unclassified)"
+                # High-sensitivity fix: If IF says Anomaly but RF is sure it's Benign,
+                # mark as Normal to avoid scaring the user with home background traffic.
+                status = "Normal"
+                reason = "Background Noise (Filtered)"
             else:
+                status = "Anomaly"
                 reason = f"Classified as {attack_type}"
 
-            if attack_type in ALERT_ATTACKS:
+            if status == "Anomaly" and attack_type in ALERT_ATTACKS:
                 send_telegram_alert(src_ip, dest_ip, attack_type, reason)
 
+        # Balanced Logging: Log all for dashboard accuracy during dev/demo.
+        # In high-traffic production, consider a separate stats table or sampling.
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""

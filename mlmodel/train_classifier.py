@@ -111,13 +111,17 @@ print("📊 Classification Report:\n")
 print(classification_report(y_test, y_pred))
 
 # =========================================================
-# Save artifacts
+# Save artifacts (Consistent with analysis.py)
 # =========================================================
-joblib.dump(clf, "attack_classifier.pkl")
-joblib.dump(scaler, "attack_scaler.pkl")
-joblib.dump(df[label_col].cat.categories.tolist(), "attack_labels.pkl")
+# Using dictionary for label_map to match train_model.py and analysis.py
+categories = df[label_col].cat.categories.tolist()
+label_map = {name: idx for idx, name in enumerate(categories)}
 
-print("💾 Saved:")
-print("   ➤ attack_classifier.pkl")
-print("   ➤ attack_scaler.pkl")
-print("   ➤ attack_labels.pkl")
+joblib.dump(clf, os.path.join(BASE_DIR, "attack_classifier.pkl"))
+joblib.dump(scaler, os.path.join(BASE_DIR, "scaler.pkl"))
+joblib.dump(label_map, os.path.join(BASE_DIR, "attack_labels.pkl"))
+
+print("💾 Saved (Consistent with PacketEye system):")
+print(f"   ➤ {os.path.join(BASE_DIR, 'attack_classifier.pkl')}")
+print(f"   ➤ {os.path.join(BASE_DIR, 'scaler.pkl')}")
+print(f"   ➤ {os.path.join(BASE_DIR, 'attack_labels.pkl')}")

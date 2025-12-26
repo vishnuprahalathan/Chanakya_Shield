@@ -16,3 +16,6 @@ TestingDatasets/
 
 # Large Database Files
 database/*.csv
+
+# Secrets
+.env

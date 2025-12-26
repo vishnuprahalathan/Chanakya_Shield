@@ -6,3 +6,4 @@ scapy
 mysql-connector-python
 requests
 dwave-neal
+python-dotenv

@@ -14,14 +14,20 @@ import datetime
 from pathlib import Path
 
 
-BOT_TOKEN ="8233619292:AAGDyAxVfDko_AEkNxMFaDWwhB4Wpx4sRIU"   
-CHAT_ID = "1115227029"     
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from the root .env file
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
 DB_CONFIG = dict(
-    host="localhost",
-    user="root",
-    password="8883",
-    database="packeteye",
+    host=os.getenv("DB_HOST", "localhost"),
+    user=os.getenv("DB_USER", "root"),
+    password=os.getenv("DB_PASSWORD", ""),
+    database=os.getenv("DB_NAME", "packeteye"),
 )
 
 

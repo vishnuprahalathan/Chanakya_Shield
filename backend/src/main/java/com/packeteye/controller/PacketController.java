@@ -36,7 +36,6 @@ public class PacketController {
 
         Process process = pb.start();
 
-       
         new Thread(() -> {
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream(), "UTF-8"))) {
@@ -52,7 +51,6 @@ public class PacketController {
         return process;
     }
 
-   
     @GetMapping("/start-capture")
     public String startCapture() {
         try {
@@ -71,7 +69,6 @@ public class PacketController {
         }
     }
 
-   
     @GetMapping("/simulate-attack")
     public String simulateAttack() {
         try {
@@ -90,7 +87,6 @@ public class PacketController {
         }
     }
 
-   
     @GetMapping("/start-telegram")
     public String startTelegramAlerts() {
         try {
@@ -109,7 +105,6 @@ public class PacketController {
         }
     }
 
-    
     @GetMapping("/stop-capture")
     public String stopCapture() {
         if (analysisProcess != null && analysisProcess.isAlive()) {
@@ -141,23 +136,22 @@ public class PacketController {
     public Map<String, String> getStatus() {
         Map<String, String> status = new HashMap<>();
         status.put("analysis", (analysisProcess != null && analysisProcess.isAlive()) ? "🟢 Running" : "🔴 Stopped");
-        status.put("simulation", (simulationProcess != null && simulationProcess.isAlive()) ? "🟢 Running" : "🔴 Stopped");
+        status.put("simulation",
+                (simulationProcess != null && simulationProcess.isAlive()) ? "🟢 Running" : "🔴 Stopped");
         status.put("telegram", (telegramProcess != null && telegramProcess.isAlive()) ? "🟢 Running" : "🔴 Stopped");
         return status;
     }
 
-   
     @PostMapping("/packets")
     public Packet addPacket(@RequestBody Packet packet) {
         return packetRepository.save(packet);
     }
 
-       @GetMapping("/packets")
+    @GetMapping("/packets")
     public List<Packet> getAllPackets() {
         return packetRepository.findTop500ByOrderByTimestampDesc();
     }
 
-    
     @GetMapping("/packets/summary")
     public Map<String, Object> getSummary() {
         long totalPackets = packetRepository.count();
@@ -167,12 +161,16 @@ public class PacketController {
         for (Object[] row : statusCounts) {
             String status = (String) row[0];
             long count = (long) row[1];
-            if ("Anomaly".equalsIgnoreCase(status)) anomalies = count;
-            else if ("Normal".equalsIgnoreCase(status)) normal = count;
+            if ("Anomaly".equalsIgnoreCase(status))
+                anomalies = count;
+            else if ("Normal".equalsIgnoreCase(status))
+                normal = count;
         }
 
         List<Object[]> attackCounts = packetRepository.countByAttackType();
-        long totalAttacks = attackCounts.stream().mapToLong(row -> (long) row[1]).sum();
+        long totalAttacks = attackCounts.stream()
+                .filter(row -> row[0] != null && !row[0].toString().equalsIgnoreCase("BENIGN"))
+                .mapToLong(row -> (long) row[1]).sum();
 
         double anomalyRate = (totalPackets == 0) ? 0 : ((double) anomalies / totalPackets) * 100.0;
 
@@ -185,7 +183,6 @@ public class PacketController {
         return summary;
     }
 
-    
     @GetMapping("/packets/timeline")
     public List<Map<String, Object>> getTimeline() {
         List<Packet> packets = packetRepository.findTop500ByOrderByTimestampDesc();
@@ -201,7 +198,6 @@ public class PacketController {
         return timeline;
     }
 
-    
     @GetMapping("/packets/protocol-summary")
     public List<Map<String, Object>> getProtocolSummary() {
         List<Object[]> results = packetRepository.countByProtocol();
@@ -212,7 +208,6 @@ public class PacketController {
         return summary;
     }
 
-    
     @GetMapping("/packets/attack-summary")
     public List<Map<String, Object>> getAttackSummary() {
         List<Object[]> results = packetRepository.countByAttackType();
@@ -229,7 +224,6 @@ public class PacketController {
         return summary;
     }
 
-   
     @GetMapping("/packets/features")
     public List<String> getSelectedFeatures() {
         File file = new File("F:\\packeteye-pro\\selected_features.json");
