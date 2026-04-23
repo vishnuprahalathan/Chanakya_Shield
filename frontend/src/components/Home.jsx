@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import CONFIG from "../config";
 import "./Home.css";
 
 const Home = () => {
@@ -7,7 +8,7 @@ const Home = () => {
 
   const startCapture = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/start-capture");
+      const res = await fetch(`${CONFIG.BACKEND_URL}/api/start-capture`);
       const text = await res.text();
       alert(text);
       navigate("/packets"); 

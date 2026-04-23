@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   LineChart, Line, PieChart, Pie, BarChart, Bar, Cell, Tooltip, ResponsiveContainer, Legend, CartesianGrid, XAxis, YAxis,
 } from "recharts";
+import CONFIG from "../config";
 import "./Dashboard.css";
 
 const COLORS = ["#00C49F", "#FFBB28", "#FF8042", "#0088FE", "#FF66CC", "#33CCFF", "#AA66FF"];
@@ -23,11 +24,11 @@ const PacketEyePro_Dashboard = () => {
     const fetchData = async () => {
       try {
         const [summaryRes, protocolRes, timelineRes, attackRes, featuresRes] = await Promise.all([
-          fetch("http://localhost:8080/api/packets/summary"),
-          fetch("http://localhost:8080/api/packets/protocol-summary"),
-          fetch("http://localhost:8080/api/packets/timeline"),
-          fetch("http://localhost:8080/api/packets/attack-summary"),
-          fetch("http://localhost:8080/api/packets/features"),
+          fetch(`${CONFIG.BACKEND_URL}/api/packets/summary`),
+          fetch(`${CONFIG.BACKEND_URL}/api/packets/protocol-summary`),
+          fetch(`${CONFIG.BACKEND_URL}/api/packets/timeline`),
+          fetch(`${CONFIG.BACKEND_URL}/api/packets/attack-summary`),
+          fetch(`${CONFIG.BACKEND_URL}/api/packets/features`),
         ]);
 
         setSummary(await summaryRes.json());

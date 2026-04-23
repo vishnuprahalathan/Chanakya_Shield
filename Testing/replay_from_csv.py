@@ -175,8 +175,9 @@ for chunk in pd.read_csv(CSV_PATH, chunksize=CHUNK_SIZE, low_memory=False):
     
     # Select only the features expected by the model
     X = attacks[QUBO_FEATURES].fillna(0).replace([np.inf,-np.inf],0)
-    X_iso = iso_scaler.transform(X)
-    preds = iso_model.predict(X_iso)
+    X_iso_scaled = iso_scaler.transform(X.values)
+    df_iso_scaled = pd.DataFrame(X_iso_scaled, columns=QUBO_FEATURES)
+    preds = iso_model.predict(df_iso_scaled)
 
    
     for i, (_, row) in enumerate(attacks.iterrows()):
@@ -199,8 +200,11 @@ for chunk in pd.read_csv(CSV_PATH, chunksize=CHUNK_SIZE, low_memory=False):
 
        
         if have_classifier:
-            X_clf = clf_scaler.transform(pd.DataFrame([X.iloc[i]]))
-            pred = clf_model.predict(X_clf)[0]
+            # Ensure we pass a DataFrame with feature names to silence warnings
+            df_row = pd.DataFrame([X.iloc[i]], columns=QUBO_FEATURES)
+            X_clf_scaled = clf_scaler.transform(df_row.values)
+            df_clf_scaled = pd.DataFrame(X_clf_scaled, columns=QUBO_FEATURES)
+            pred = clf_model.predict(df_clf_scaled)[0]
             # Use dictionary lookup with default 'Unknown'
             attack_type = attack_labels.get(pred, "Unknown")
         else:
@@ -215,7 +219,19 @@ for chunk in pd.read_csv(CSV_PATH, chunksize=CHUNK_SIZE, low_memory=False):
         if attack_type in ALERT_ATTACKS:
             send_telegram_alert(src, dst, attack_type, reason)
 
-        
+        # 🚀 BRIDGE TO EVALUATION DASHBOARD
+        # Send simulation data to the Evaluation Server for real-time Quantum analysis
+        try:
+            eval_payload = {
+                "features": X.iloc[i].tolist(),
+                "true_label": 1, # It's a simulated attack
+                "attack_type": attack_type,
+                "packet_id": attack_counter
+            }
+            requests.post("http://localhost:8001/api/inject-eval", json=eval_payload, timeout=0.5)
+        except Exception as e:
+            pass # Don't stop simulation if evaluation server is down
+            
         cursor.execute("""
             INSERT INTO packets (timestamp, src_ip, dest_ip, protocol, length, flags, status, reason, attack_type)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)

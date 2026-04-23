@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import com.packeteye.model.Packet;
 import com.packeteye.repository.PacketRepository;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*") // Allows all origins for easier free hosting deployment
 @RestController
 @RequestMapping("/api")
 public class PacketController {
@@ -57,9 +57,9 @@ public class PacketController {
             if (analysisProcess != null && analysisProcess.isAlive()) {
                 return " analysis.py is already running.";
             }
-            String pythonExe = "C:\\Users\\Vishnu Prahalathan\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
-            String workingDir = "F:\\packeteye-pro";
-            String scriptPath = workingDir + "\\mlmodel\\analysis.py";
+            String pythonExe = System.getenv("PYTHON_EXE") != null ? System.getenv("PYTHON_EXE") : "python";
+            String workingDir = System.getProperty("user.dir");
+            String scriptPath = new File(workingDir, "mlmodel/analysis.py").getAbsolutePath();
 
             analysisProcess = runPythonScript(pythonExe, scriptPath, workingDir);
             return "✅ Real-time packet capture started successfully ";
@@ -75,9 +75,9 @@ public class PacketController {
             if (simulationProcess != null && simulationProcess.isAlive()) {
                 return " Simulation is already running.";
             }
-            String pythonExe = "C:\\Users\\Vishnu Prahalathan\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
-            String workingDir = "F:\\packeteye-pro";
-            String scriptPath = workingDir + "\\Testing\\replay_from_csv.py";
+            String pythonExe = System.getenv("PYTHON_EXE") != null ? System.getenv("PYTHON_EXE") : "python";
+            String workingDir = System.getProperty("user.dir");
+            String scriptPath = new File(workingDir, "Testing/replay_from_csv.py").getAbsolutePath();
 
             simulationProcess = runPythonScript(pythonExe, scriptPath, workingDir);
             return "🎯 Attack simulation started successfully (replay_from_csv.py)";
@@ -93,9 +93,9 @@ public class PacketController {
             if (telegramProcess != null && telegramProcess.isAlive()) {
                 return " Telegram service already running.";
             }
-            String pythonExe = "C:\\Users\\Vishnu Prahalathan\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
-            String workingDir = "F:\\packeteye-pro";
-            String scriptPath = workingDir + "\\Testing\\telegram_alert_service_whitelist.py";
+            String pythonExe = System.getenv("PYTHON_EXE") != null ? System.getenv("PYTHON_EXE") : "python";
+            String workingDir = System.getProperty("user.dir");
+            String scriptPath = new File(workingDir, "Testing/telegram_alert_service_whitelist.py").getAbsolutePath();
 
             telegramProcess = runPythonScript(pythonExe, scriptPath, workingDir);
             return "📲 Telegram alert service started successfully!";

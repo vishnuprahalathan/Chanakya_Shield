@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import CONFIG from "../config";
 import "./PacketsTable.css";
 
 const PacketsTable = () => {
@@ -9,7 +10,7 @@ const PacketsTable = () => {
   useEffect(() => {
     const fetchPackets = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/packets");
+        const res = await fetch(`${CONFIG.BACKEND_URL}/api/packets`);
         const data = await res.json();
         setPackets(data);
       } catch (err) {
@@ -28,7 +29,7 @@ const PacketsTable = () => {
   const stopCapture = async () => {
     setIsStopping(true);
     try {
-      const res = await fetch("http://localhost:8080/api/stop-capture");
+      const res = await fetch(`${CONFIG.BACKEND_URL}/api/stop-capture`);
       const text = await res.text();
       alert(text);
       setIsStopped(true); // ✅ mark capture as stopped

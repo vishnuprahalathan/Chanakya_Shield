@@ -55,20 +55,21 @@ def train_and_save():
     X_selected = X.iloc[:, selected_indices]
     
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X_selected)
+    X_scaled_array = scaler.fit_transform(X_selected)
+    
+    # CRITICAL: Preserve feature names by converting back to DataFrame
+    X_scaled = pd.DataFrame(X_scaled_array, columns=X_selected.columns)
+    
     print(f"DEBUG: Scaler expects {scaler.n_features_in_} features.")
 
     # Hybrid Ensemble Training
     
-    # 1. Unsupervised: Isolation Forest (Anomaly Detection)
+    # Isolation Forest (Anomaly Detection)
+    # Ensuring it is fitted with a DataFrame to preserve feature_names_in_
     iso_forest = IsolationForest(n_estimators=100, contamination=0.05, random_state=42, n_jobs=-1)
     iso_forest.fit(X_scaled)
 
-    # 2. Supervised: Random Forest (Attack Classification)
-    # Filter only attacks for classifier training or train on all with class weights?
-    # We train on all to distinguish types. 
-    # If dataset has string labels, we need to encode them for RF
-    
+    # Random Forest (Attack Classification)
     attack_labels = y.unique()
     label_map = {label: idx for idx, label in enumerate(attack_labels)}
     y_encoded = y.map(label_map)
@@ -83,7 +84,7 @@ def train_and_save():
     joblib.dump(selected_indices, os.path.join(BASE_DIR, "selected_features.pkl"))
     joblib.dump(label_map, os.path.join(BASE_DIR, "attack_labels.pkl"))
     
-    print("Training complete. Artifacts saved.")
+    print("Training complete. Artifacts saved with feature names.")
 
 if __name__ == "__main__":
     train_and_save()

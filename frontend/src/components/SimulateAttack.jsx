@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import CONFIG from "../config";
 import "./SimulateAttack.css";
 
 const SimulateAttack = () => {
@@ -11,7 +12,7 @@ const SimulateAttack = () => {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/status");
+        const res = await fetch(`${CONFIG.BACKEND_URL}/api/status`);
         const data = await res.json();
         setIsRunning(data.simulation && data.simulation.includes("Running"));
       } catch (err) {
@@ -27,7 +28,7 @@ const SimulateAttack = () => {
   const startSimulation = async () => {
     setIsStarting(true);
     try {
-      const res = await fetch("http://localhost:8080/api/simulate-attack");
+      const res = await fetch(`${CONFIG.BACKEND_URL}/api/simulate-attack`);
       const text = await res.text();
       // alert(text); // Basic alert removed for better UX
       setIsRunning(true);
@@ -42,7 +43,7 @@ const SimulateAttack = () => {
   const stopSimulation = async () => {
     setIsStopping(true);
     try {
-      const res = await fetch("http://localhost:8080/api/stop-simulation");
+      const res = await fetch(`${CONFIG.BACKEND_URL}/api/stop-simulation`);
       setIsRunning(false);
     } catch (err) {
       console.error("Failed to stop simulation:", err);

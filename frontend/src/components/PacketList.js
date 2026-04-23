@@ -1,12 +1,12 @@
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import CONFIG from '../config';
 
 const PacketList = () => {
   const [packets, setPackets] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8080/api/packets")
+    axios.get(`${CONFIG.BACKEND_URL}/api/packets`)
       .then(response => {
         setPackets(response.data);
       })

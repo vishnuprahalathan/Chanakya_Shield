@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
+import CONFIG from '../config';
 
 function Dashboard() {
   const [packets, setPackets] = useState([]);
@@ -9,7 +10,7 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchPackets = () => {
-      axios.get('http://localhost:8080/api/packets')
+      axios.get(`${CONFIG.BACKEND_URL}/api/packets`)
         .then(res => setPackets(res.data))
         .catch(err => console.error('Failed to fetch packets:', err));
     };

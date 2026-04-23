@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import Home from "./components/Home";
 import PacketsTable from "./components/PacketsTable";
 import PacketEyeDashboard from "./components/PacketEyePro_Dashboard";
+import EvaluationDashboard from "./components/Evaluation/EvaluationDashboard";
 import SimulateAttack from "./components/SimulateAttack";
 import TelegramAlerts from "./components/TelegramAlerts";
 import "./App.css";
@@ -17,6 +18,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/packets" element={<PacketsTable />} />
           <Route path="/dashboard" element={<PacketEyeDashboard />} />
+          <Route path="/evaluation" element={<EvaluationDashboard />} />
           <Route path="/simulate" element={<SimulateAttack />} />
           <Route path="/alerts" element={<TelegramAlerts />} />
         </Routes>

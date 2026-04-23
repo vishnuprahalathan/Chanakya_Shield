@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import CONFIG from "../config";
 import "./TelegramAlerts.css";
 
 const TelegramAlerts = () => {
@@ -7,7 +8,7 @@ const TelegramAlerts = () => {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/packets?status=Anomaly");
+        const res = await fetch(`${CONFIG.BACKEND_URL}/api/packets?status=Anomaly`);
         const data = await res.json();
         setAlerts(data.slice(0, 15));
       } catch (err) {

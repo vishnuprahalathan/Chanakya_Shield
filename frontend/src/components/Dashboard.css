@@ -1,6 +1,6 @@
 /* Dashboard.css */
 .dashboard {
-  padding: 8rem 2rem 2rem;
+  padding: 10rem 2rem 2rem;
   /* Top padding for fixed navbar */
   max-width: 1400px;
   margin: 0 auto;
@@ -19,6 +19,7 @@
   font-size: 2.5rem;
   background: linear-gradient(to right, #fff, #8892b0);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

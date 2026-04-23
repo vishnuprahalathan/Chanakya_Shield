@@ -20,6 +20,7 @@ const Navbar = () => {
           <li><Link to="/dashboard" className={isActive("/dashboard")}>Dashboard</Link></li>
           <li><Link to="/packets" className={isActive("/packets")}>Live Traffic</Link></li>
           <li><Link to="/simulate" className={isActive("/simulate")}>Simulation</Link></li>
+          {/* <li><Link to="/evaluation" className={isActive("/evaluation")}>Evaluation</Link></li> */}
           <li><Link to="/alerts" className={isActive("/alerts")}>Alerts</Link></li>
         </ul>
 

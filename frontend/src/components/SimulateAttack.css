@@ -1,6 +1,6 @@
 /* SimulateAttack.css */
 .simulate-container {
-  padding: 8rem 2rem 2rem;
+  padding: 10rem 2rem 2rem;
   max-width: 900px;
   margin: 0 auto;
   text-align: center;
@@ -11,6 +11,7 @@
   margin-bottom: 1rem;
   background: linear-gradient(to right, var(--danger), #ff6b6b);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.05rem;
 }

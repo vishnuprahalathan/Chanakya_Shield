@@ -1,4 +1,5 @@
 import React, { createContext, useEffect, useState } from "react";
+import CONFIG from "../config";
 
 export const QuantumContext = createContext();
 
@@ -10,7 +11,7 @@ export const QuantumProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/system/status")
+    fetch(`${CONFIG.BACKEND_URL}/api/system/status`)
       .then(res => res.json())
       .then(data => {
         setQuantum({

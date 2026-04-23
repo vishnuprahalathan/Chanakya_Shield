@@ -1,0 +1,136 @@
+======================================================================
+EVALUATION SERVER WEBSOCKET TEST
+======================================================================
+Connecting to ws://localhost:8001/ws/evaluation...
+[OK] Connected successfully!
+
+Receiving evaluation data (will show first 5 packets)...
+
+======================================================================
+Packet #0
+======================================================================
+
+CLASSICAL BASELINE:
+   Accuracy: 100.00%
+   F1 Score: 100.0000
+   FPR: 0.0000
+   FNR: 0.0000
+   Avg Confidence: 1.0000
+   Avg Latency: 2.0630 ms
+
+QUANTUM-INSPIRED:
+   Accuracy: 100.00%
+   F1 Score: 100.0000
+   FPR: 0.0000
+   FNR: 0.0000
+   Avg Confidence: 1.0000
+   Avg Latency: 4.1820 ms
+
+EXPLANATION:
+   Constructive interference in attack subspace confirmed high-confidence detection.
+
+GROUND TRUTH: DDoS
+
+======================================================================
+Packet #1
+======================================================================
+
+CLASSICAL BASELINE:
+   Accuracy: 100.00%
+   F1 Score: 100.0000
+   FPR: 0.0000
+   FNR: 0.0000
+   Avg Confidence: 1.0000
+   Avg Latency: 1.6210 ms
+
+QUANTUM-INSPIRED:
+   Accuracy: 100.00%
+   F1 Score: 100.0000
+   FPR: 0.0000
+   FNR: 0.0000
+   Avg Confidence: 1.0000
+   Avg Latency: 3.7590 ms
+
+EXPLANATION:
+   Destructive interference of anomaly features suppressing False Positive.
+
+GROUND TRUTH: BENIGN
+
+======================================================================
+Packet #2
+======================================================================
+
+CLASSICAL BASELINE:
+   Accuracy: 100.00%
+   F1 Score: 100.0000
+   FPR: 0.0000
+   FNR: 0.0000
+   Avg Confidence: 1.0000
+   Avg Latency: 1.5940 ms
+
+QUANTUM-INSPIRED:
+   Accuracy: 100.00%
+   F1 Score: 100.0000
+   FPR: 0.0000
+   FNR: 0.0000
+   Avg Confidence: 1.0000
+   Avg Latency: 3.6930 ms
+
+EXPLANATION:
+   Destructive interference of anomaly features suppressing False Positive.
+
+GROUND TRUTH: BENIGN
+
+======================================================================
+Packet #3
+======================================================================
+
+CLASSICAL BASELINE:
+   Accuracy: 100.00%
+   F1 Score: 100.0000
+   FPR: 0.0000
+   FNR: 0.0000
+   Avg Confidence: 1.0000
+   Avg Latency: 1.5490 ms
+
+QUANTUM-INSPIRED:
+   Accuracy: 100.00%
+   F1 Score: 100.0000
+   FPR: 0.0000
+   FNR: 0.0000
+   Avg Confidence: 1.0000
+   Avg Latency: 3.6210 ms
+
+EXPLANATION:
+   Destructive interference of anomaly features suppressing False Positive.
+
+GROUND TRUTH: BENIGN
+
+======================================================================
+Packet #4
+======================================================================
+
+CLASSICAL BASELINE:
+   Accuracy: 100.00%
+   F1 Score: 100.0000
+   FPR: 0.0000
+   FNR: 0.0000
+   Avg Confidence: 1.0000
+   Avg Latency: 1.4840 ms
+
+QUANTUM-INSPIRED:
+   Accuracy: 100.00%
+   F1 Score: 100.0000
+   FPR: 0.0000
+   FNR: 0.0000
+   Avg Confidence: 1.0000
+   Avg Latency: 3.5950 ms
+
+EXPLANATION:
+   Constructive interference in attack subspace confirmed high-confidence detection.
+
+GROUND TRUTH: DDoS
+
+
+[SUCCESS] Test completed successfully!
+The evaluation server is streaming data correctly.
