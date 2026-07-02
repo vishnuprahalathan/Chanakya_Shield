@@ -226,7 +226,13 @@ public class PacketController {
 
     @GetMapping("/packets/features")
     public List<String> getSelectedFeatures() {
-        File file = new File("F:\\packeteye-pro\\selected_features.json");
+        // Use portable path resolution relative to working directory
+        String workingDir = System.getProperty("user.dir");
+        File file = new File(workingDir, "selected_features.json");
+        if (!file.exists()) {
+            // Fallback: check one level up (when running inside /backend)
+            file = new File(new File(workingDir).getParent(), "selected_features.json");
+        }
         if (!file.exists()) {
             return List.of("No features selected yet.");
         }

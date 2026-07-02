@@ -1,0 +1,30 @@
+services:
+  # ── ML Service (FastAPI) ──────────────────────────────────────────────────
+  - type: web
+    name: chanakya-ml
+    runtime: docker
+    dockerfilePath: ./mlmodel/Dockerfile
+    dockerContext: ./mlmodel
+    envVars:
+      - key: PORT
+        value: 8001
+      - key: EVAL_SERVER_URL
+        value: http://localhost:8001
+
+  # ── Backend (Spring Boot) ─────────────────────────────────────────────────
+  - type: web
+    name: chanakya-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: DB_HOST
+        sync: false         # Set this in Render dashboard after creating Aiven DB
+      - key: DB_NAME
+        value: packeteye
+      - key: DB_USER
+        sync: false         # Set in dashboard
+      - key: DB_PASSWORD
+        sync: false         # Set in dashboard
+      - key: PYTHON_EXE
+        value: python3
